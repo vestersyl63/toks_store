@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop | TOK'S Makeup 'n' Skincare</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --pink: #db2777; --pink-dark: #be185d; --pink-light: #fce7f3;
+  --rose: #881337; --rose-light: #fff1f2; --accent: #f59e0b;
+  --dark: #1e1b4b; --gray: #64748b; --shadow: 0 20px 40px -10px rgba(219,39,119,0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#f8fafc; color:var(--dark); }
+h1,h2,h3,.brand { font-family:'Playfair Display',serif; }
+
+header {
+  background:linear-gradient(135deg,var(--pink-dark) 0%,var(--pink) 100%);
+  color:white; position:sticky; top:0; z-index:1000;
+  box-shadow:0 10px 40px -10px rgba(219,39,119,0.4);
+}
+.top-bar { background:rgba(0,0,0,0.15); padding:0.5rem 2rem; font-size:0.85rem; display:flex; justify-content:space-between; }
+.top-bar a { color:#fcd34d; text-decoration:none; margin-left:1rem; font-weight:500; }
+nav { display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem; max-width:1400px; margin:0 auto; }
+
+/* Smaller brand with logo slot */
+.brand { display:flex; align-items:center; gap:0.75rem; font-size:1.25rem; font-weight:700; letter-spacing:0.5px; }
+.logo-slot {
+  width:42px; height:42px; border-radius:50%; background:white;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; color:var(--pink-dark); box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  overflow:hidden; flex-shrink:0;
+}
+.logo-slot img { width:100%; height:100%; object-fit:cover; }
+.brand-text { display:flex; flex-direction:column; line-height:1.2; }
+.brand-text span { color:var(--accent); font-family:'Playfair Display',serif; font-size:0.7em; opacity:0.9; }
+
+.nav-links { display:flex; gap:2.5rem; list-style:none; }
+.nav-links a { color:white; text-decoration:none; font-weight:500; }
+.nav-actions { display:flex; gap:1.5rem; align-items:center; }
+.cart-btn { position:relative; cursor:pointer; font-size:1.4rem; background:rgba(255,255,255,0.15); width:45px; height:45px; border-radius:12px; display:flex; align-items:center; justify-content:center; transition:0.3s; }
+.cart-btn:hover { background:rgba(255,255,255,0.25); transform:scale(1.05); }
+.cart-count { position:absolute; top:-6px; right:-6px; background:var(--accent); color:var(--dark); font-size:0.7rem; font-weight:800; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.mobile-menu { display:none; font-size:1.5rem; cursor:pointer; }
+
+.shop-container { max-width:1400px; margin:0 auto; padding:2rem; display:grid; grid-template-columns:260px 1fr; gap:3rem; }
+.sidebar { position:sticky; top:100px; height:fit-content; }
+.filter-box { background:white; border-radius:20px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:var(--shadow); border:1px solid #ffe4e6; }
+.filter-box h3 { margin-bottom:1rem; font-size:1.1rem; color:var(--pink-dark); display:flex; align-items:center; gap:0.5rem; }
+.filter-option { display:flex; align-items:center; gap:0.75rem; padding:0.7rem 0; cursor:pointer; border-bottom:1px solid #fff1f2; transition:0.2s; font-size:0.95rem; }
+.filter-option:hover { color:var(--pink); padding-left:5px; }
+.filter-option i { width:20px; color:var(--pink); }
+.filter-option.active { color:var(--pink-dark); font-weight:700; background:var(--pink-light); margin:0 -1.5rem; padding-left:1.5rem; padding-right:1.5rem; border-left:3px solid var(--pink); }
+.search-box { width:100%; padding:0.875rem 1rem; border:2px solid #ffe4e6; border-radius:12px; margin-bottom:1.5rem; font-family:inherit; outline:none; transition:0.3s; }
+.search-box:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(219,39,119,0.1); }
+
+.shop-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+.shop-header h1 { font-size:2rem; color:var(--pink-dark); }
+.sort-select { padding:0.5rem 1rem; border-radius:10px; border:1px solid #ffe4e6; background:white; cursor:pointer; font-family:inherit; outline:none; }
+
+/* Horizontal Product List */
+.products-list { display:flex; flex-direction:column; gap:1.5rem; }
+.product-card-horizontal {
+  display:flex; flex-direction:row; background:white; border-radius:20px;
+  overflow:hidden; box-shadow:var(--shadow); transition:0.4s;
+  border:1px solid #ffe4e6; position:relative;
+}
+.product-card-horizontal:hover {
+  transform:translateY(-4px);
+  box-shadow:0 20px 40px -10px rgba(219,39,119,0.2);
+  border-color:var(--pink-light);
+}
+.product-badge {
+  position:absolute; top:1rem; left:1rem; background:var(--accent); color:var(--dark);
+  padding:0.4rem 1rem; border-radius:20px; font-size:0.75rem; font-weight:800;
+  z-index:3; text-transform:uppercase; letter-spacing:0.5px;
+}
+.product-badge.service { background:var(--pink); color:white; }
+.product-badge.training { background:var(--dark); color:white; }
+.product-img-horizontal {
+  width:220px; min-height:200px; background:linear-gradient(135deg,#fce7f3 0%,#fff1f2 100%);
+  display:flex; align-items:center; justify-content:center; font-size:3.5rem;
+  position:relative; overflow:hidden; flex-shrink:0;
+}
+.product-img-horizontal::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:60%;
+  background:linear-gradient(to top,rgba(219,39,119,0.15),transparent);
+  opacity:0; transition:0.3s;
+}
+.product-card-horizontal:hover .product-img-horizontal::after { opacity:1; }
+.quick-view-horizontal {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:white; color:var(--pink-dark); padding:0.6rem 1.25rem;
+  border-radius:30px; font-weight:700; opacity:0; transition:0.3s;
+  cursor:pointer; z-index:4; border:none; box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  font-size:0.9rem;
+}
+.product-card-horizontal:hover .quick-view-horizontal { opacity:1; }
+.product-info-horizontal {
+  padding:1.5rem 2rem; flex:1; display:flex; flex-direction:column; justify-content:center;
+}
+.product-cat { color:var(--pink); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:0.5rem; }
+.product-title { font-size:1.15rem; font-weight:700; margin-bottom:0.5rem; color:var(--dark); line-height:1.3; }
+.product-desc { font-size:0.9rem; color:var(--gray); margin-bottom:0.75rem; line-height:1.4; }
+.product-rating { color:#fbbf24; font-size:0.85rem; margin-bottom:0.75rem; }
+.product-meta-horizontal {
+  display:flex; justify-content:space-between; align-items:center; margin-top:auto;
+}
+.product-price { font-size:1.3rem; font-weight:800; color:var(--pink-dark); }
+.add-cart {
+  background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:white; border:none;
+  width:45px; height:45px; border-radius:12px; cursor:pointer; font-size:1.1rem;
+  transition:0.3s; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 15px rgba(219,39,119,0.3);
+}
+.add-cart:hover { transform:scale(1.1) rotate(5deg); box-shadow:0 6px 20px rgba(219,39,119,0.5); }
+
+.cart-overlay { position:fixed; inset:0; background:rgba(30,27,75,0.4); backdrop-filter:blur(4px); z-index:2000; opacity:0; pointer-events:none; transition:0.3s; }
+.cart-overlay.active { opacity:1; pointer-events:all; }
+.cart-sidebar { position:fixed; top:0; right:0; width:440px; max-width:100%; height:100vh; background:white; z-index:2001; transform:translateX(100%); transition:0.4s cubic-bezier(0.16,1,0.3,1); display:flex; flex-direction:column; box-shadow:-10px 0 40px rgba(0,0,0,0.1); }
+.cart-sidebar.active { transform:translateX(0); }
+.cart-header { padding:1.5rem; border-bottom:1px solid #ffe4e6; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,#fff1f2,#fff); }
+.cart-header h2 { font-family:'Playfair Display',serif; color:var(--pink-dark); }
+.close-cart { background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--gray); width:40px; height:40px; border-radius:50%; transition:0.3s; }
+.close-cart:hover { background:var(--pink-light); color:var(--pink-dark); }
+.cart-items { flex:1; overflow-y:auto; padding:1.5rem; }
+.cart-item { display:flex; gap:1rem; margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #ffe4e6; }
+.cart-item-img { width:80px; height:100px; border-radius:12px; background:linear-gradient(135deg,#fce7f3,#fff1f2); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:var(--pink); flex-shrink:0; overflow:hidden; }
+.cart-item-details { flex:1; }
+.cart-item-title { font-weight:700; margin-bottom:0.25rem; color:var(--dark); }
+.cart-item-price { color:var(--pink-dark); font-weight:800; }
+.qty-control { display:flex; align-items:center; gap:0.75rem; margin-top:0.5rem; }
+.qty-btn { width:30px; height:30px; border-radius:8px; border:1px solid #ffe4e6; background:white; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--pink-dark); font-weight:700; transition:0.2s; }
+.qty-btn:hover { background:var(--pink-light); border-color:var(--pink); }
+.remove-item { color:#ef4444; cursor:pointer; font-size:0.85rem; margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; font-weight:500; }
+.cart-footer { padding:1.5rem; border-top:1px solid #ffe4e6; background:#fff1f2; }
+.cart-total { display:flex; justify-content:space-between; font-size:1.25rem; font-weight:800; margin-bottom:1rem; color:var(--dark); }
+.checkout-btn { width:100%; padding:1rem; background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:white; border:none; border-radius:14px; font-size:1rem; font-weight:700; cursor:pointer; transition:0.3s; box-shadow:0 4px 15px rgba(219,39,119,0.3); }
+.checkout-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(219,39,119,0.4); }
+
+.modal-overlay { position:fixed; inset:0; background:rgba(30,27,75,0.5); backdrop-filter:blur(6px); z-index:2500; opacity:0; pointer-events:none; transition:0.3s; display:flex; align-items:center; justify-content:center; padding:1rem; }
+.modal-overlay.active { opacity:1; pointer-events:all; }
+.modal-box { background:white; border-radius:24px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); transform:translateY(20px); transition:0.4s; }
+.modal-overlay.active .modal-box { transform:translateY(0); }
+.modal-header { padding:1.5rem; border-bottom:1px solid #ffe4e6; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,#fff1f2,#fff); border-radius:24px 24px 0 0; }
+.modal-header h2 { font-family:'Playfair Display',serif; color:var(--pink-dark); }
+.modal-body { padding:1.5rem; }
+.form-group { margin-bottom:1.25rem; }
+.form-group label { display:block; margin-bottom:0.5rem; font-weight:600; font-size:0.9rem; color:var(--dark); }
+.form-group input, .form-group textarea, .form-group select {
+  width:100%; padding:0.875rem 1rem; border:2px solid #ffe4e6; border-radius:12px; font-family:inherit; font-size:1rem; outline:none; transition:0.3s;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(219,39,119,0.1); }
+.bank-box { background:linear-gradient(135deg,#fff1f2,#fce7f3); border-radius:16px; padding:1.25rem; margin:1.5rem 0; border:1px solid #fecdd3; }
+.bank-box h4 { color:var(--pink-dark); margin-bottom:0.75rem; font-size:1rem; }
+.bank-box p { margin-bottom:0.4rem; font-size:0.95rem; color:var(--dark); }
+.bank-box p strong { color:var(--pink-dark); }
+
+.success-box { text-align:center; padding:2rem; }
+.success-box .icon { width:80px; height:80px; background:linear-gradient(135deg,#d1fae5,#a7f3d0); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:#059669; margin:0 auto 1.5rem; }
+.success-box h3 { font-size:1.5rem; color:var(--dark); margin-bottom:0.5rem; }
+.success-box p { color:var(--gray); margin-bottom:1.5rem; }
+.whatsapp-btn { display:inline-flex; align-items:center; gap:0.75rem; padding:1rem 2rem; background:linear-gradient(135deg,#22c55e,#16a34a); color:white; border-radius:50px; font-weight:700; text-decoration:none; margin-bottom:0.75rem; transition:0.3s; box-shadow:0 4px 15px rgba(34,197,94,0.3); }
+.whatsapp-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(34,197,94,0.4); }
+.email-btn { display:inline-flex; align-items:center; gap:0.75rem; padding:1rem 2rem; background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:white; border-radius:50px; font-weight:700; text-decoration:none; transition:0.3s; box-shadow:0 4px 15px rgba(219,39,119,0.3); }
+.email-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(219,39,119,0.4); }
+.call-btn { display:inline-flex; align-items:center; gap:0.75rem; padding:1rem 2rem; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; border-radius:50px; font-weight:700; text-decoration:none; margin-bottom:0.75rem; transition:0.3s; box-shadow:0 4px 15px rgba(59,130,246,0.3); }
+.call-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(59,130,246,0.4); }
+
+.toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(100px); background:var(--dark); color:white; padding:1rem 2rem; border-radius:14px; z-index:3000; opacity:0; transition:0.4s; display:flex; align-items:center; gap:0.75rem; box-shadow:0 10px 30px rgba(0,0,0,0.3); font-weight:500; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+@media (max-width:968px) {
+  .shop-container { grid-template-columns:1fr; }
+  .sidebar { position:relative; top:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; }
+}
+@media (max-width:768px) {
+  .nav-links { display:none; }
+  .mobile-menu { display:block; }
+  .product-card-horizontal { flex-direction:column; }
+  .product-img-horizontal { width:100%; height:220px; }
+  .cart-sidebar { width:100%; }
+}
+@media (max-width:640px) {
+  .brand { font-size:1rem; }
+  .logo-slot { width:36px; height:36px; font-size:1rem; }
+}
+</style>
+</head>
+<body>
+
+<<header>
+  <div class="top-bar">
+    <div><i class="fas fa-phone"></i> <span id="headerPhone">08030961415</span> | <span id="headerPhone2">08072708868</span></div>
+    <div>
+      <a href="https://instagram.com/toks.makeup" target="_blank"><i class="fab fa-instagram"></i> @toks.makeup</a>
+      <a href="mailto:Toksmakeover@gmail.com" id="headerEmailLink"><i class="fas fa-envelope"></i> <span id="headerEmail">Toksmakeover@gmail.com</span></a>
+    </div>
+  </div>
+  <nav>
+    <div class="brand">
+      <div class="logo-slot" title="Add your logo here">
+        <i class="fas fa-crown"></i>
+        <!-- <img src="your-logo.png" alt="Logo"> -->
+      </div>
+      <div class="brand-text">
+        TOK'S <span>Makeup 'n' Skincare</span>
+      </div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="shop.html?cat=services">Services</a></li>
+      <li><a href="shop.html?cat=training">Training</a></li>
+      <li><a href="admin.html" style="color:var(--accent);"><i class="fas fa-lock"></i> Admin</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div class="cart-btn" onclick="toggleCart()">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-count" id="cartCount">0</span>
+      </div>
+      <div class="mobile-menu"><i class="fas fa-bars"></i></div>
+    </div>
+  </nav>
+</header>
+
+<div class="shop-container">
+  <aside class="sidebar">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search products..." onkeyup="filterProducts()">
+    <div class="filter-box">
+      <h3><i class="fas fa-filter"></i> Categories</h3>
+      <div class="filter-option active" onclick="setCategory('all')" data-cat="all"><i class="fas fa-th-large"></i> All Products</div>
+      <div class="filter-option" onclick="setCategory('skincare')" data-cat="skincare"><i class="fas fa-spa"></i> Skincare</div>
+      <div class="filter-option" onclick="setCategory('makeup')" data-cat="makeup"><i class="fas fa-magic"></i> Makeup</div>
+      <div class="filter-option" onclick="setCategory('services')" data-cat="services"><i class="fas fa-hands"></i> Services</div>
+      <div class="filter-option" onclick="setCategory('accessories')" data-cat="accessories"><i class="fas fa-eye"></i> Accessories</div>
+      <div class="filter-option" onclick="setCategory('training')" data-cat="training"><i class="fas fa-graduation-cap"></i> Training</div>
+    </div>
+    <div class="filter-box">
+      <h3><i class="fas fa-tag"></i> Price Range</h3>
+      <div class="filter-option" onclick="setPriceRange(0,1000000)"><i class="fas fa-circle" style="font-size:8px;color:var(--pink);"></i> All Prices</div>
+      <div class="filter-option" onclick="setPriceRange(0,5000)"><i class="fas fa-circle" style="font-size:8px;color:var(--pink);"></i> Under ₦5,000</div>
+      <div class="filter-option" onclick="setPriceRange(5000,15000)"><i class="fas fa-circle" style="font-size:8px;color:var(--pink);"></i> ₦5,000 - ₦15,000</div>
+      <div class="filter-option" onclick="setPriceRange(15000,50000)"><i class="fas fa-circle" style="font-size:8px;color:var(--pink);"></i> ₦15,000 - ₦50,000</div>
+      <div class="filter-option" onclick="setPriceRange(50000,1000000)"><i class="fas fa-circle" style="font-size:8px;color:var(--pink);"></i> Premium (₦50k+)</div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="shop-header">
+      <h1 id="pageTitle">All Collection</h1>
+      <select class="sort-select" onchange="sortProducts(this.value)">
+        <option value="default">Sort by: Featured</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="name">Name: A-Z</option>
+      </select>
+    </div>
+    <div class="products-list" id="shopList"></div>
+  </main>
+</div>
+
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h2>Your Shopping Bag</h2>
+    <button class="close-cart" onclick="toggleCart()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total"><span>Total</span><span id="cartTotal">₦0</span></div>
+    <button class="checkout-btn" onclick="openCheckout()"><i class="fas fa-lock"></i> Proceed to Checkout</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2><i class="fas fa-credit-card" style="color:var(--pink);"></i> Checkout</h2>
+      <button class="close-cart" onclick="closeCheckout()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="checkoutBody">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="custName" placeholder="Enter your full name">
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="custPhone" placeholder="e.g. 0803 096 1415">
+      </div>
+      <div class="form-group">
+        <label>Delivery Address (or "Pickup" for services)</label>
+        <textarea id="custAddress" rows="2" placeholder="Enter your address"></textarea>
+      </div>
+      <div class="bank-box">
+        <h4><i class="fas fa-university"></i> Bank Transfer Details</h4>
+        <p><strong>Bank:</strong> <span id="bankName">First Bank of Nigeria</span></p>
+        <p><strong>Account Number:</strong> <span id="accountNumber">0123456789</span></p>
+        <p><strong>Account Name:</strong> <span id="accountName">TOK'S Makeup N Skincare</span></p>
+        <p style="font-size:0.85rem;color:var(--gray);margin-top:0.5rem;">Please transfer the exact amount and use your name as reference. Admin will confirm before shipping.</p>
+      </div>
+      <div style="background:#f8fafc;border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;font-weight:600;"><span>Order Total</span><span id="checkoutTotal" style="color:var(--pink-dark);font-size:1.2rem;">₦0</span></div>
+      </div>
+      <button class="checkout-btn" onclick="placeOrder()" style="margin-bottom:0.5rem;"><i class="fas fa-check-circle"></i> Place Order</button>
+      <p style="text-align:center;font-size:0.85rem;color:var(--gray);">By placing order, you agree to send payment proof via WhatsApp.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-body success-box">
+      <div class="icon"><i class="fas fa-check"></i></div>
+      <h3>Order Placed Successfully!</h3>
+      <p>Thank you <span id="successName">Customer</span>. Your order is pending confirmation. Please send payment proof via WhatsApp or Email.</p>
+      <div id="bankSummary" style="background:#f8fafc;border-radius:12px;padding:1rem;margin-bottom:1.5rem;text-align:left;font-size:0.9rem;">
+        <p style="margin-bottom:0.3rem;"><strong>Bank:</strong> <span id="succBank">...</span></p>
+        <p style="margin-bottom:0.3rem;"><strong>Account:</strong> <span id="succAcc">...</span></p>
+        <p><strong>Name:</strong> <span id="succName">...</span></p>
+      </div>
+      <a href="#" class="whatsapp-btn" id="waBtn" target="_blank"><i class="fab fa-whatsapp"></i> Send Order to WhatsApp</a><br>
+      <a href="#" class="email-btn" id="emailBtn"><i class="fas fa-envelope"></i> Send Order to Email</a><br>
+      <a href="#" class="call-btn" id="callBtn"><i class="fas fa-phone"></i> Call Us to Confirm</a><br><br>
+      <button class="btn btn-outline" onclick="closeSuccess()" style="padding:0.75rem 2rem;border:2px solid #ffe4e6;color:var(--dark);border-radius:50px;background:white;cursor:pointer;font-weight:600;">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-check-circle" style="color:var(--accent);"></i> <span id="toastMsg">Added to cart</span></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+let db = null, useFirebase = false;
+try { firebase.initializeApp(firebaseConfig); db = firebase.database(); useFirebase = true; }
+catch(e) { console.log('Firebase offline', e); }
+
+let businessSettings = {
+  bankName: "First Bank of Nigeria", accountNumber: "0123456789", accountName: "TOK'S Makeup N Skincare",
+  whatsappNumber: "2348030961415", businessEmail: "Toksmakeover@gmail.com",
+  phone1: "08030961415", phone2: "08072708868", currency: "₦"
+};
+
+function loadSettings() {
+  if (useFirebase) {
+    db.ref('settings/business').once('value').then(snap => {
+      if (snap.exists()) { businessSettings = { ...businessSettings, ...snap.val() }; applySettings(); }
+    }).catch(e => console.log(e));
+  }
+  const local = localStorage.getItem('toks_settings');
+  if (local) { businessSettings = { ...businessSettings, ...JSON.parse(local) }; applySettings(); }
+}
+function applySettings() {
+  document.getElementById('headerPhone').textContent = businessSettings.phone1;
+  document.getElementById('headerPhone2').textContent = businessSettings.phone2;
+  document.getElementById('headerEmail').textContent = businessSettings.businessEmail;
+  document.getElementById('headerEmailLink').href = "mailto:" + businessSettings.businessEmail;
+  document.getElementById('bankName').textContent = businessSettings.bankName;
+  document.getElementById('accountNumber').textContent = businessSettings.accountNumber;
+  document.getElementById('accountName').textContent = businessSettings.accountName;
+}
+
+let allProducts = JSON.parse(localStorage.getItem('toks_products')) || [
+  { id:1, name:"Organic Black Soap", price:3500, cat:"skincare", rating:5, image:"🧼", badge:"BESTSELLER", desc:"Handmade organic soap with shea butter and honey for glowing skin." },
+  { id:2, name:"Vitamin C Brightening Serum", price:8000, cat:"skincare", rating:5, image:"💧", badge:"", desc:"High-potency vitamin C serum for dark spots and even tone." },
+  { id:3, name:"Glow Face Cream", price:5500, cat:"skincare", rating:4, image:"✨", badge:"", desc:"Daily moisturizer with SPF 15 for radiant, protected skin." },
+  { id:4, name:"Matte Lipstick Collection", price:12000, cat:"makeup", rating:5, image:"💄", badge:"HOT", desc:"Set of 6 long-lasting matte lipsticks in trendy shades." },
+  { id:5, name:"Professional Foundation Palette", price:15000, cat:"makeup", rating:5, image:"🎨", badge:"", desc:"12-color foundation palette for all skin tones." },
+  { id:6, name:"Makeup Brush Pro Set", price:9000, cat:"makeup", rating:4, image:"🖌️", badge:"", desc:"10 premium synthetic brushes with travel pouch." },
+  { id:7, name:"Facial Treatment (60 mins)", price:15000, cat:"services", rating:5, image:"🧖‍♀️", badge:"", desc:"Deep cleansing facial with steam, extraction & mask." },
+  { id:8, name:"Full Body Massage", price:20000, cat:"services", rating:5, image:"💆‍♀️", badge:"", desc:"Relaxing Swedish massage with aromatherapy oils." },
+  { id:9, name:"Body Scrub & Polish", price:12000, cat:"services", rating:4, image:"🧽", badge:"", desc:"Exfoliating full-body scrub for silky smooth skin." },
+  { id:10, name:"Microblading (Eyebrows)", price:35000, cat:"services", rating:5, image:"✍️", badge:"", desc:"Semi-permanent eyebrow tattoo with 6-week touch-up." },
+  { id:11, name:"Lash Extensions (Full Set)", price:18000, cat:"services", rating:5, image:"👁️", badge:"", desc:"Classic individual lash extensions, lasts 3-4 weeks." },
+  { id:12, name:"Gele Tying (Event)", price:5000, cat:"services", rating:5, image:"👑", badge:"", desc:"Professional gele styling for weddings & occasions." },
+  { id:13, name:"Manicure & Pedicure", price:8000, cat:"services", rating:4, image:"💅", badge:"", desc:"Classic nail care with polish and cuticle treatment." },
+  { id:14, name:"Gold Teeth Whitening", price:25000, cat:"services", rating:5, image:"🦷", badge:"", desc:"Professional teeth whitening session, instant results." },
+  { id:15, name:"Eyelash Extension Kit", price:6500, cat:"accessories", rating:4, image:"👀", badge:"", desc:"DIY lash extension kit with glue, tweezers & lashes." },
+  { id:16, name:"Shea Body Butter (Large)", price:4000, cat:"skincare", rating:5, image:"🥥", badge:"", desc:"Raw unrefined shea butter for deep moisture." },
+  { id:17, name:"Makeup Masterclass (4 Weeks)", price:50000, cat:"training", rating:5, image:"🎓", badge:"", desc:"Intensive makeup artistry certification course." },
+  { id:18, name:"Skincare Formulation Class", price:40000, cat:"training", rating:5, image:"🧪", badge:"", desc:"Learn to create organic skincare products from scratch." },
+  { id:19, name:"Gele Tying Workshop", price:15000, cat:"training", rating:4, image:"🎀", badge:"", desc:"One-day intensive gele styling workshop." },
+  { id:20, name:"Lash Tech Certification", price:45000, cat:"training", rating:5, image:"📜", badge:"", desc:"Become a certified lash extension technician." },
+];
+
+let cart = JSON.parse(localStorage.getItem('toks_cart')) || [];
+let currentCat = 'all', currentMin = 0, currentMax = 1000000;
+let lastOrder = null;
+
+function init() {
+  loadSettings();
+  if (useFirebase) {
+    db.ref('products').once('value').then(snap => {
+      if (snap.exists()) {
+        const fbProducts = Object.values(snap.val());
+        allProducts = fbProducts;
+        localStorage.setItem('toks_products', JSON.stringify(allProducts));
+      }
+      const urlParams = new URLSearchParams(window.location.search);
+      const cat = urlParams.get('cat');
+      if (cat) setCategory(cat); else renderShop();
+      updateCartUI();
+      if (window.location.hash === '#checkout' && cart.length > 0) openCheckout();
+    }).catch(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const cat = urlParams.get('cat');
+      if (cat) setCategory(cat); else renderShop();
+      updateCartUI();
+    });
+  } else {
+    const urlParams = new URLSearchParams(window.location.search);
+    const cat = urlParams.get('cat');
+    if (cat) setCategory(cat); else renderShop();
+    updateCartUI();
+    if (window.location.hash === '#checkout' && cart.length > 0) openCheckout();
+  }
+}
+
+function setCategory(cat) {
+  currentCat = cat;
+  document.querySelectorAll('.filter-option[data-cat]').forEach(el => el.classList.toggle('active', el.dataset.cat === cat));
+  const titles = { all:'All Collection', skincare:'Organic Skincare', makeup:'Professional Makeup', services:'Beauty Services', accessories:'Accessories', training:'Training Classes' };
+  document.getElementById('pageTitle').textContent = titles[cat] || 'Products';
+  renderShop();
+}
+function setPriceRange(min,max) { currentMin=min; currentMax=max; renderShop(); }
+function filterProducts() { renderShop(); }
+function sortProducts(sortType) { renderShop(sortType); }
+
+function renderShop(sortType='default') {
+  const search = document.getElementById('searchBox').value.toLowerCase();
+  let filtered = allProducts.filter(p => {
+    const matchCat = currentCat === 'all' || p.cat === currentCat;
+    const matchPrice = p.price >= currentMin && p.price <= currentMax;
+    const matchSearch = p.name.toLowerCase().includes(search) || (p.desc && p.desc.toLowerCase().includes(search));
+    return matchCat && matchPrice && matchSearch;
+  });
+  if (sortType === 'price-low') filtered.sort((a,b) => a.price - b.price);
+  if (sortType === 'price-high') filtered.sort((a,b) => b.price - a.price);
+  if (sortType === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name));
+
+  const list = document.getElementById('shopList');
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:4rem;color:var(--gray);"><i class="fas fa-search" style="font-size:3rem;margin-bottom:1rem;display:block;color:var(--pink-light);"></i>No products found.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(p => {
+    const badgeClass = p.cat==='services'?'service':p.cat==='training'?'training':'';
+    const showBadge = p.badge || p.cat==='services' || p.cat==='training';
+    const badgeText = p.badge || (p.cat==='services'?'SERVICE':p.cat==='training'?'CLASS':'');
+    const imgHtml = p.imageData ? `<img src="${p.imageData}" style="width:100%;height:100%;object-fit:cover;">` : (p.image || '🛍️');
+    return `
+    <div class="product-card-horizontal">
+      ${showBadge ? `<span class="product-badge ${badgeClass}">${badgeText}</span>` : ''}
+      <div class="product-img-horizontal">${imgHtml}
+        <button class="quick-view-horizontal" onclick="addToCart(${p.id})">Add to Bag</button>
+      </div>
+      <div class="product-info-horizontal">
+        <div class="product-cat">${p.cat}</div>
+        <div class="product-title">${p.name}</div>
+        <div class="product-rating">${'★'.repeat(p.rating||5)}${'☆'.repeat(5-(p.rating||5))}</div>
+        <div class="product-desc">${p.desc || ''}</div>
+        <div class="product-meta-horizontal">
+          <div class="product-price">${businessSettings.currency}${p.price.toLocaleString()}</div>
+          <button class="add-cart" onclick="addToCart(${p.id})"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addToCart(id) {
+  const item = allProducts.find(p => p.id === id);
+  if (!item) return;
+  const existing = cart.find(c => c.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...item, qty: 1 });
+  saveCart(); updateCartUI();
+  showToast(`${item.name} added to bag`);
+}
+function saveCart() { localStorage.setItem('toks_cart', JSON.stringify(cart)); }
+function toggleCart() { document.getElementById('cartOverlay').classList.toggle('active'); document.getElementById('cartSidebar').classList.toggle('active'); }
+
+function updateCartUI() {
+  const count = cart.reduce((sum,c) => sum + c.qty, 0);
+  document.getElementById('cartCount').textContent = count;
+  const container = document.getElementById('cartItems');
+  if (cart.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:3rem 1rem;color:var(--gray);"><i class="fas fa-shopping-bag" style="font-size:3rem;margin-bottom:1rem;display:block;color:var(--pink-light);"></i>Your bag is empty</div>';
+  } else {
+    container.innerHTML = cart.map((item,idx) => `
+      <div class="cart-item">
+        <div class="cart-item-img">${item.imageData ? `<img src="${item.imageData}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">` : (item.image || '🛍️')}</div>
+        <div class="cart-item-details">
+          <div class="cart-item-title">${item.name}</div>
+          <div class="cart-item-price">${businessSettings.currency}${(item.price*item.qty).toLocaleString()}</div>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty(${idx},-1)">-</button>
+            <span>${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
+          </div>
+          <span class="remove-item" onclick="removeItem(${idx})"><i class="fas fa-trash"></i> Remove</span>
+        </div>
+      </div>`).join('');
+  }
+  const total = cart.reduce((sum,c) => sum + (c.price*c.qty), 0);
+  document.getElementById('cartTotal').textContent = businessSettings.currency + total.toLocaleString();
+}
+function changeQty(idx,delta) { cart[idx].qty += delta; if (cart[idx].qty <= 0) cart.splice(idx,1); saveCart(); updateCartUI(); }
+function removeItem(idx) { cart.splice(idx,1); saveCart(); updateCartUI(); }
+
+function openCheckout() {
+  if (cart.length === 0) { showToast('Your bag is empty'); return; }
+  toggleCart();
+  const total = cart.reduce((sum,c) => sum + (c.price*c.qty), 0);
+  document.getElementById('checkoutTotal').textContent = businessSettings.currency + total.toLocaleString();
+  document.getElementById('checkoutModal').classList.add('active');
+}
+function closeCheckout() { document.getElementById('checkoutModal').classList.remove('active'); }
+
+function placeOrder() {
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+  if (!name || !phone) { showToast('Please enter your name and phone'); return; }
+  const total = cart.reduce((sum,c) => sum + (c.price*c.qty), 0);
+  const order = {
+    id: 'ORD-' + Date.now().toString().slice(-6),
+    items: [...cart], total: total, status: 'Pending',
+    date: new Date().toLocaleString(),
+    customer: name, phone: phone, address: address
+  };
+  let orders = JSON.parse(localStorage.getItem('toks_orders')) || [];
+  orders.push(order);
+  localStorage.setItem('toks_orders', JSON.stringify(orders));
+  if (useFirebase) {
+    try { db.ref('orders/' + order.id).set(order); } catch(e) { console.log(e); }
+  }
+  lastOrder = order;
+  cart = []; saveCart(); updateCartUI(); closeCheckout();
+  showSuccess(order);
+}
+
+function showSuccess(order) {
+  document.getElementById('successName').textContent = order.customer;
+  document.getElementById('succBank').textContent = businessSettings.bankName;
+  document.getElementById('succAcc').textContent = businessSettings.accountNumber;
+  document.getElementById('succName').textContent = businessSettings.accountName;
+  const waPhone = businessSettings.whatsappNumber.replace(/\D/g,'');
+  const items = order.items.map(i => `- ${i.name} (x${i.qty})`).join('%0A');
+  const waText = `*NEW ORDER - TOK'S MAKEUP 'N' SKINCARE*%0A%0A🧾 *Order ID:* ${order.id}%0A👤 *Customer:* ${order.customer}%0A📱 *Phone:* ${order.phone}%0A📍 *Address:* ${order.address || 'N/A'}%0A%0A*Items:*%0A${items}%0A%0A💰 *Total:* ${businessSettings.currency}${order.total.toLocaleString()}%0A📊 *Status:* ${order.status}%0A%0A✅ I have made payment via bank transfer. Here is my proof.`;
+  document.getElementById('waBtn').href = `https://wa.me/${waPhone}?text=${waText}`;
+  const subject = `New Order ${order.id} - ${order.customer}`;
+  const body = `Order ID: ${order.id}\nCustomer: ${order.customer}\nPhone: ${order.phone}\nAddress: ${order.address || 'N/A'}\n\nItems:\n${order.items.map(i => `- ${i.name} (x${i.qty})`).join('\n')}\n\nTotal: ${businessSettings.currency}${order.total.toLocaleString()}\nStatus: ${order.status}`;
+  document.getElementById('emailBtn').href = `mailto:${businessSettings.businessEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  document.getElementById('callBtn').href = 'tel:' + (businessSettings.phone1 || '').replace(/\s/g,'');
+  document.getElementById('successModal').classList.add('active');
+}
+function closeSuccess() { document.getElementById('successModal').classList.remove('active'); }
+function showToast(msg) { const t=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+init();
+</script>
+</body>
+</html>
