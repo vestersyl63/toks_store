@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel | TOK'S Makeup 'n' Skincare</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --pink: #db2777; --pink-dark: #be185d; --pink-light: #fce7f3;
+  --rose: #881337; --rose-light: #fff1f2; --accent: #f59e0b;
+  --dark: #1e1b4b; --gray: #64748b; --success: #059669; --danger: #dc2626;
+  --sidebar-bg: #0f172a; --sidebar-text: #94a3b8;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#f8fafc; color:var(--dark); }
+h1,h2,h3,.brand { font-family:'Playfair Display',serif; }
+
+/* ===== LOGIN ===== */
+.login-overlay {
+  position:fixed; inset:0; background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,var(--pink-dark) 100%);
+  z-index:9999; display:flex; align-items:center; justify-content:center;
+}
+.login-box {
+  background:white; padding:2.5rem; border-radius:24px;
+  box-shadow:0 25px 50px -12px rgba(0,0,0,0.4);
+  width:100%; max-width:400px; text-align:center;
+}
+.login-logo { font-size:3rem; margin-bottom:0.5rem; }
+.login-box h2 { font-family:'Playfair Display',serif; color:var(--pink-dark); font-size:1.6rem; margin-bottom:0.25rem; }
+.login-box p { color:var(--gray); margin-bottom:1.5rem; font-size:0.9rem; }
+.input-group { margin-bottom:1rem; text-align:left; }
+.input-group label { display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:var(--dark); }
+.input-group input {
+  width:100%; padding:0.75rem 1rem; border:2px solid #e2e8f0;
+  border-radius:12px; font-family:inherit; font-size:1rem; outline:none; transition:0.3s;
+}
+.input-group input:focus { border-color:var(--pink); box-shadow:0 0 0 4px rgba(219,39,119,0.1); }
+.login-btn {
+  width:100%; padding:0.875rem; background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:white;
+  border:none; border-radius:12px; font-size:1rem; font-weight:700; cursor:pointer; transition:0.3s;
+  box-shadow:0 4px 15px rgba(219,39,119,0.3); margin-top:0.5rem;
+}
+.login-btn:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(219,39,119,0.4); }
+.error-msg { color:var(--danger); font-size:0.85rem; margin-top:0.75rem; min-height:1.2rem; }
+
+/* ===== ADMIN LAYOUT ===== */
+.admin-layout { display:grid; grid-template-columns:260px 1fr; min-height:100vh; }
+.sidebar {
+  background:var(--sidebar-bg); color:var(--sidebar-text); padding:1.5rem 0;
+  position:sticky; top:0; height:100vh; overflow-y:auto; display:flex; flex-direction:column;
+}
+.admin-brand { padding:0 1.25rem 1.5rem; border-bottom:1px solid #1e293b; margin-bottom:1rem; }
+.admin-brand h2 { color:white; font-family:'Playfair Display',serif; font-size:1.4rem; }
+.admin-brand span { color:var(--accent); font-size:0.8rem; font-weight:500; }
+.nav-menu { flex:1; }
+.nav-item {
+  padding:0.85rem 1.25rem; cursor:pointer; transition:0.25s;
+  display:flex; align-items:center; gap:0.75rem; border-left:3px solid transparent;
+  font-weight:500; font-size:0.9rem; margin:0 0.5rem; border-radius:0 8px 8px 0;
+}
+.nav-item:hover, .nav-item.active {
+  background:rgba(219,39,119,0.1); color:white; border-left-color:var(--pink);
+}
+.nav-item i { width:20px; text-align:center; font-size:1rem; }
+.badge-pill {
+  margin-left:auto; background:var(--pink); color:white; font-size:0.65rem;
+  padding:0.15rem 0.5rem; border-radius:20px; font-weight:700;
+}
+.nav-footer {
+  padding:1rem 1.25rem 0; border-top:1px solid #1e293b; margin-top:auto;
+}
+.nav-footer .nav-item { margin:0.25rem 0; border-radius:8px; }
+.nav-footer .nav-item:hover { background:rgba(255,255,255,0.05); }
+
+/* Submenu */
+.has-submenu { position:relative; }
+.submenu-icon { margin-left:auto; font-size:0.7rem; transition:transform 0.3s; }
+.sub-menu {
+  display:none; padding-left:2.8rem; margin:0 0.5rem;
+}
+.sub-menu.active { display:block; }
+.sub-item {
+  padding:0.6rem 1rem; font-size:0.85rem; color:var(--sidebar-text);
+  cursor:pointer; border-left:2px solid transparent; transition:0.2s;
+  border-radius:0 6px 6px 0; margin-bottom:0.25rem;
+}
+.sub-item:hover, .sub-item.active {
+  color:white; background:rgba(219,39,119,0.08);
+  border-left-color:var(--pink);
+}
+
+.main-content { padding:1.5rem 2rem; max-width:1400px; }
+.top-bar-admin {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;
+  background:white; padding:1rem 1.5rem; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.top-bar-admin h1 { font-size:1.5rem; color:var(--dark); }
+.top-actions { display:flex; gap:0.75rem; }
+.top-btn {
+  padding:0.6rem 1.25rem; border-radius:10px; border:none; font-weight:600; font-size:0.85rem;
+  cursor:pointer; transition:0.2s; display:inline-flex; align-items:center; gap:0.5rem;
+}
+.top-btn.store { background:var(--pink-light); color:var(--pink-dark); }
+.top-btn.store:hover { background:var(--pink); color:white; }
+.top-btn.logout { background:#f1f5f9; color:var(--gray); }
+.top-btn.logout:hover { background:#fee2e2; color:var(--danger); }
+
+/* ===== STATS ===== */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.stat-card {
+  background:white; border-radius:16px; padding:1.25rem;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04); display:flex;
+  align-items:center; gap:1rem; transition:0.3s; border:1px solid #f1f5f9;
+}
+.stat-card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.08); border-color:var(--pink-light); }
+.stat-icon { width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+.stat-card.revenue .stat-icon { background:#fef3c7; color:#d97706; }
+.stat-card.orders .stat-icon { background:#fce7f3; color:var(--pink-dark); }
+.stat-card.products .stat-icon { background:#dbeafe; color:#2563eb; }
+.stat-card.pending .stat-icon { background:#fee2e2; color:var(--danger); }
+.stat-info h3 { font-size:1.5rem; margin-bottom:0.15rem; color:var(--dark); }
+.stat-info p { color:var(--gray); font-size:0.85rem; }
+
+/* ===== CARDS ===== */
+.card { background:white; border-radius:16px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.04); margin-bottom:1.5rem; border:1px solid #f1f5f9; scroll-margin-top:100px; }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem; }
+.card-header h3 { font-size:1.1rem; color:var(--dark); display:flex; align-items:center; gap:0.5rem; }
+
+/* ===== TABLES ===== */
+.table-wrap { overflow-x:auto; border-radius:12px; border:1px solid #f1f5f9; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; padding:0.875rem 1rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--gray); border-bottom:2px solid #f1f5f9; font-weight:700; background:#fafafa; }
+td { padding:0.875rem 1rem; border-bottom:1px solid #f1f5f9; vertical-align:middle; font-size:0.9rem; }
+tr:hover { background:#fafafa; }
+.product-cell { display:flex; align-items:center; gap:0.75rem; }
+.product-thumb { width:40px; height:40px; border-radius:8px; background:var(--pink-light); display:flex; align-items:center; justify-content:center; font-size:1rem; overflow:hidden; }
+.product-thumb img { width:100%; height:100%; object-fit:cover; }
+
+/* Horizontal line style for products table */
+#productsTable tbody tr { border-bottom: 2px solid #e2e8f0; }
+#productsTable tbody tr:last-child { border-bottom: none; }
+#productsTable td { border-bottom: none; }
+
+/* ===== BADGES & BUTTONS ===== */
+.badge { padding:0.3rem 0.75rem; border-radius:20px; font-size:0.75rem; font-weight:700; }
+.badge-pending { background:#fef3c7; color:#92400e; }
+.badge-accepted { background:#d1fae5; color:#065f46; }
+.badge-completed { background:#dbeafe; color:#1e40af; }
+.badge-cancelled { background:#fee2e2; color:#991b1b; }
+.badge-low { background:#fee2e2; color:var(--danger); }
+
+.btn-sm { padding:0.5rem 1rem; border-radius:8px; font-size:0.8rem; font-weight:600; border:none; cursor:pointer; transition:0.2s; margin-right:0.4rem; display:inline-flex; align-items:center; gap:0.35rem; text-decoration:none; }
+.btn-accept { background:var(--success); color:white; }
+.btn-accept:hover { background:#047857; }
+.btn-decline { background:var(--danger); color:white; }
+.btn-decline:hover { background:#b91c1c; }
+.btn-complete { background:#2563eb; color:white; }
+.btn-complete:hover { background:#1d4ed8; }
+.btn-restock { background:var(--accent); color:var(--dark); }
+.btn-restock:hover { background:#d97706; }
+.btn-save { background:linear-gradient(135deg,var(--pink),var(--pink-dark)); color:white; }
+.btn-save:hover { opacity:0.9; }
+.btn-add { background:var(--success); color:white; }
+.btn-add:hover { background:#047857; }
+
+.qty-input { width:60px; padding:0.4rem; border:2px solid #e2e8f0; border-radius:6px; text-align:center; font-family:inherit; outline:none; }
+.qty-input:focus { border-color:var(--pink); }
+
+.tab-btns { display:flex; gap:0.4rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+.tab-btn { padding:0.5rem 1rem; border-radius:8px; border:none; background:#f1f5f9; cursor:pointer; font-weight:600; transition:0.2s; color:var(--gray); font-size:0.85rem; }
+.tab-btn.active { background:var(--pink-dark); color:white; }
+
+.chart-container { max-width:600px; margin:0 auto; }
+
+/* ===== SETTINGS / ADD PRODUCT FORM ===== */
+.form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; }
+.form-group { margin-bottom:1rem; }
+.form-group label { display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.85rem; color:var(--dark); }
+.form-group input, .form-group textarea, .form-group select {
+  width:100%; padding:0.75rem 1rem; border:2px solid #e2e8f0; border-radius:10px;
+  font-family:inherit; outline:none; transition:0.3s; font-size:0.95rem;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(219,39,119,0.08); }
+.form-group small { color:var(--gray); font-size:0.75rem; margin-top:0.25rem; display:block; }
+.image-preview {
+  width:100%; height:200px; border:2px dashed #e2e8f0; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; color:var(--gray);
+  margin-top:0.5rem; overflow:hidden; background:#fafafa;
+}
+.image-preview img { width:100%; height:100%; object-fit:cover; }
+.image-preview.has-image { border-color:var(--pink); border-style:solid; }
+
+@media (max-width:968px) {
+  .admin-layout { grid-template-columns:1fr; }
+  .sidebar { display:none; position:fixed; z-index:100; width:260px; height:100vh; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN GATE ===== -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">💄</div>
+    <h2>TOK'S Admin</h2>
+    <p>Sign in to manage your store</p>
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Enter username">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password">
+    </div>
+    <button class="login-btn" onclick="login()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ===== ADMIN DASHBOARD ===== -->
+<div class="admin-layout" id="adminLayout" style="display:none;">
+  <aside class="sidebar">
+    <div class="admin-brand">
+      <h2>TOK'S</h2>
+      <span>Management System</span>
+    </div>
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard">
+        <i class="fas fa-chart-pie"></i> Dashboard
+      </div>
+      <div class="nav-item" onclick="showTab('orders')" id="nav-orders">
+        <i class="fas fa-shopping-bag"></i> Orders
+        <span id="pendingBadge" class="badge-pill" style="display:none;">0</span>
+      </div>
+      <div class="nav-item" onclick="showTab('inventory')" id="nav-inventory">
+        <i class="fas fa-boxes"></i> Inventory
+      </div>
+      <div class="nav-item" onclick="showTab('products')" id="nav-products">
+        <i class="fas fa-tags"></i> Products
+      </div>
+      <div class="nav-item" onclick="showTab('addProduct')" id="nav-addProduct">
+        <i class="fas fa-plus-circle"></i> Add Product
+      </div>
+      <div class="nav-item has-submenu" onclick="toggleSubmenu('settingsMenu', this)" id="nav-settings">
+        <i class="fas fa-cog"></i> Settings
+        <i class="fas fa-chevron-down submenu-icon"></i>
+      </div>
+      <div class="sub-menu" id="settingsMenu">
+        <div class="sub-item" onclick="showSettingsSection('store')">Store Config</div>
+        <div class="sub-item" onclick="showSettingsSection('bank')">Bank Details</div>
+        <div class="sub-item" onclick="showSettingsSection('security')">Security</div>
+      </div>
+    </div>
+    <div class="nav-footer">
+      <div class="nav-item" onclick="location.href='index.html'">
+        <i class="fas fa-store"></i> View Storefront
+      </div>
+      <div class="nav-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Sign Out
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard">
+      <div class="top-bar-admin">
+        <h1>Dashboard Overview</h1>
+        <div class="top-actions">
+          <button class="top-btn store" onclick="location.href='index.html'"><i class="fas fa-store"></i> Storefront</button>
+          <button class="top-btn logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card revenue">
+          <div class="stat-icon"><i class="fas fa-naira-sign"></i></div>
+          <div class="stat-info"><h3 id="statRevenue">₦0</h3><p>Total Revenue</p></div>
+        </div>
+        <div class="stat-card orders">
+          <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+          <div class="stat-info"><h3 id="statOrders">0</h3><p>Total Orders</p></div>
+        </div>
+        <div class="stat-card products">
+          <div class="stat-icon"><i class="fas fa-box"></i></div>
+          <div class="stat-info"><h3 id="statProducts">0</h3><p>Products</p></div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-info"><h3 id="statPending">0</h3><p>Pending</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-chart-line" style="color:var(--pink);"></i> Weekly Sales</h3></div>
+        <div class="chart-container"><canvas id="salesChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="tab-orders" style="display:none;">
+      <div class="top-bar-admin">
+        <h1>Order Management</h1>
+        <div class="top-actions">
+          <button class="top-btn store" onclick="location.href='index.html'"><i class="fas fa-store"></i> Storefront</button>
+          <button class="top-btn logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tab-btns">
+          <button class="tab-btn active" onclick="filterOrders('all',this)">All</button>
+          <button class="tab-btn" onclick="filterOrders('Pending',this)">Pending</button>
+          <button class="tab-btn" onclick="filterOrders('Accepted',this)">Accepted</button>
+          <button class="tab-btn" onclick="filterOrders('Completed',this)">Completed</button>
+          <button class="tab-btn" onclick="filterOrders('Cancelled',this)">Cancelled</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div id="tab-inventory" style="display:none;">
+      <div class="top-bar-admin">
+        <h1>Inventory & Restock</h1>
+        <div class="top-actions">
+          <button class="top-btn store" onclick="location.href='index.html'"><i class="fas fa-store"></i> Storefront</button>
+          <button class="top-btn logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-boxes" style="color:var(--pink);"></i> Stock Levels</h3>
+          <span class="badge badge-low">Low stock highlighted</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Restock</th></tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS LIST -->
+    <div id="tab-products" style="display:none;">
+      <div class="top-bar-admin">
+        <h1>All Products</h1>
+        <div class="top-actions">
+          <button class="top-btn store" onclick="location.href='index.html'"><i class="fas fa-store"></i> Storefront</button>
+          <button class="top-btn logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-tags" style="color:var(--pink);"></i> Product Catalog</h3>
+          <button class="btn-sm btn-add" onclick="showTab('addProduct')"><i class="fas fa-plus"></i> Add New</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Image</th><th>Product</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
+            <tbody id="productsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD PRODUCT -->
+    <div id="tab-addProduct" style="display:none;">
+      <div class="top-bar-admin">
+        <h1>Add New Product</h1>
+        <div class="top-actions">
+          <button class="top-btn store" onclick="location.href='index.html'"><i class="fas fa-store"></i> Storefront</button>
+          <button class="top-btn logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3><i class="fas fa-plus-circle" style="color:var(--pink);"></i> Product Details</h3></div>
+        <div class="form-grid">
+          <div>
+            <div class="form-group">
+              <label>Product Name</label>
+              <input type="text" id="newProdName" placeholder="e.g. Organic Black Soap">
+            </div>
+            <div class="form-group">
+              <label>Price (₦)</label>
+              <input type="number" id="newProdPrice" placeholder="e.g. 3500">
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <select id="newProdCat">
+                <option value="skincare">Skincare</option>
+                <option value="makeup">Makeup</option>
+                <option value="services">Services</option>
+                <option value="accessories">Accessories</option>
+                <option value="training">Training</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Badge (optional)</label>
+              <input type="text" id="newProdBadge" placeholder="e.g. BESTSELLER, HOT, leave blank">
+            </div>
+          </div>
+          <div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="newProdDesc" rows="3" placeholder="Short description of the product..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Product Image</label>
+              <input type="file" id="newProdImage" accept="image/*" onchange="previewImage(this)">
+              <small>Upload from your device. Max 2MB recommended. Images will save to Firebase Storage if configured.</small>
+              <div class="image-preview" id="imagePreview">
+                <span><i class="fas fa-image" style="font-size:2rem;color:#cbd5e1;"></i><br>No image selected</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right; margin-top:1rem;">
+          <button class="btn-sm btn-save" onclick="addProduct()" style="padding:0.75rem 2rem;"><i class="fas fa-save"></i> Save Product</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" style="display:none;">
+      <div class="top-bar-admin">
+        <h1>Business Settings</h1>
+        <div class="top-actions">
+          <button class="top-btn store" onclick="location.href='index.html'"><i class="fas fa-store"></i> Storefront</button>
+          <button class="top-btn logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+        </div>
+      </div>
+
+      <!-- Store Configuration -->
+      <div class="card" id="settings-store">
+        <div class="card-header"><h3><i class="fas fa-cog" style="color:var(--pink);"></i> Store Configuration</h3></div>
+        <div class="form-grid">
+          <div>
+            <div class="form-group">
+              <label>WhatsApp Number (with country code)</label>
+              <input type="text" id="setWhatsApp" value="2348030961415">
+              <small>Format: 234XXXXXXXXXX. Orders sent here.</small>
+            </div>
+            <div class="form-group">
+              <label>Business Email</label>
+              <input type="email" id="setEmail" value="Toksmakeover@gmail.com">
+              <small>Order confirmations sent here</small>
+            </div>
+            <div class="form-group">
+              <label>Phone Numbers</label>
+              <input type="text" id="setPhone1" value="08030961415" style="margin-bottom:0.5rem;">
+              <input type="text" id="setPhone2" value="08072708868">
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right; margin-top:1rem;">
+          <button class="btn-sm btn-save" onclick="saveSettings()" style="padding:0.75rem 2rem;"><i class="fas fa-save"></i> Save Store Details</button>
+        </div>
+      </div>
+
+      <!-- Bank Details -->
+      <div class="card" id="settings-bank" style="margin-top:1.5rem;">
+        <div class="card-header"><h3><i class="fas fa-university" style="color:var(--pink);"></i> Bank Payment Details (Customer Checkout)</h3></div>
+        <div class="form-grid">
+          <div>
+            <div class="form-group">
+              <label>Bank Name</label>
+              <input type="text" id="setBankName" value="First Bank of Nigeria">
+              <small>Shown on checkout page for bank transfers</small>
+            </div>
+            <div class="form-group">
+              <label>Account Number</label>
+              <input type="text" id="setAccNum" value="0123456789">
+            </div>
+            <div class="form-group">
+              <label>Account Name</label>
+              <input type="text" id="setAccName" value="TOK'S Makeup N Skincare">
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right; margin-top:1rem;">
+          <button class="btn-sm btn-save" onclick="saveSettings()" style="padding:0.75rem 2rem;"><i class="fas fa-save"></i> Save Bank Details</button>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="card" id="settings-security" style="margin-top:1.5rem;">
+        <div class="card-header"><h3><i class="fas fa-lock" style="color:var(--pink);"></i> Security — Change Password</h3></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currPassword" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPassword" placeholder="Enter new password">
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+          </div>
+        </div>
+        <div style="text-align:right; margin-top:1rem;">
+          <button class="btn-sm btn-save" onclick="changePassword()" style="padding:0.75rem 2rem;"><i class="fas fa-key"></i> Update Password</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+let db = null, storage = null, useFirebase = false;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  storage = firebase.storage();
+  useFirebase = true;
+} catch(e) {
+  console.log('Firebase offline', e);
+}
+
+let businessSettings = {
+  bankName: "First Bank of Nigeria", accountNumber: "0123456789", accountName: "TOK'S Makeup N Skincare",
+  whatsappNumber: "2348030961415", businessEmail: "Toksmakeover@gmail.com",
+  phone1: "08030961415", phone2: "08072708868", currency: "₦"
+};
+
+let inventory = JSON.parse(localStorage.getItem('toks_inventory')) || generateInventory();
+let orders = JSON.parse(localStorage.getItem('toks_orders')) || [];
+let products = JSON.parse(localStorage.getItem('toks_products')) || generateDefaultProducts();
+let salesChart;
+let currentImageData = null;
+
+function generateDefaultProducts() {
+  return [
+    { id:1, name:"Organic Black Soap", price:3500, cat:"skincare", rating:5, image:"🧼", badge:"BESTSELLER", desc:"Handmade organic soap with shea butter and honey." },
+    { id:2, name:"Vitamin C Serum", price:8000, cat:"skincare", rating:5, image:"💧", badge:"", desc:"High-potency vitamin C for dark spots." },
+    { id:3, name:"Matte Lipstick Collection", price:12000, cat:"makeup", rating:5, image:"💄", badge:"HOT", desc:"Set of 6 long-lasting matte lipsticks." },
+    { id:4, name:"Foundation Palette", price:15000, cat:"makeup", rating:5, image:"🎨", badge:"", desc:"12-color foundation palette." },
+    { id:5, name:"Facial Treatment", price:15000, cat:"services", rating:5, image:"🧖‍♀️", badge:"", desc:"Deep cleansing facial with steam." },
+    { id:6, name:"Full Body Massage", price:20000, cat:"services", rating:5, image:"💆‍♀️", badge:"", desc:"Relaxing Swedish massage." },
+    { id:7, name:"Lash Extension Kit", price:6500, cat:"accessories", rating:4, image:"👁️", badge:"", desc:"DIY lash extension kit." },
+    { id:8, name:"Makeup Masterclass", price:50000, cat:"training", rating:5, image:"🎓", badge:"", desc:"4-week certification course." },
+  ];
+}
+function generateInventory() {
+  const items = [
+    { id:1, name:"Organic Black Soap", cat:"skincare", price:3500, stock:12 },
+    { id:2, name:"Vitamin C Serum", cat:"skincare", price:8000, stock:5 },
+    { id:3, name:"Glow Face Cream", cat:"skincare", price:5500, stock:20 },
+    { id:4, name:"Matte Lipstick Collection", cat:"makeup", price:12000, stock:8 },
+    { id:5, name:"Foundation Palette", cat:"makeup", price:15000, stock:3 },
+    { id:6, name:"Brush Pro Set", cat:"makeup", price:9000, stock:15 },
+    { id:7, name:"Facial Treatment", cat:"services", price:15000, stock:999 },
+    { id:8, name:"Full Body Massage", cat:"services", price:20000, stock:999 },
+    { id:9, name:"Body Scrub", cat:"services", price:12000, stock:999 },
+    { id:10, name:"Microblading", cat:"services", price:35000, stock:999 },
+    { id:11, name:"Lash Extensions", cat:"services", price:18000, stock:999 },
+    { id:12, name:"Gele Tying", cat:"services", price:5000, stock:999 },
+    { id:13, name:"Manicure & Pedicure", cat:"services", price:8000, stock:999 },
+    { id:14, name:"Teeth Whitening", cat:"services", price:25000, stock:999 },
+    { id:15, name:"Lash Extension Kit", cat:"accessories", price:6500, stock:7 },
+    { id:16, name:"Shea Body Butter", cat:"skincare", price:4000, stock:25 },
+    { id:17, name:"Makeup Masterclass", cat:"training", price:50000, stock:20 },
+    { id:18, name:"Skincare Formulation", cat:"training", price:40000, stock:15 },
+    { id:19, name:"Gele Workshop", cat:"training", price:15000, stock:30 },
+    { id:20, name:"Lash Tech Cert", cat:"training", price:45000, stock:10 },
+  ];
+  localStorage.setItem('toks_inventory', JSON.stringify(items));
+  return items;
+}
+
+async function loadSettings() {
+  if (useFirebase) {
+    try {
+      const snap = await db.ref('settings/business').once('value');
+      if (snap.exists()) businessSettings = { ...businessSettings, ...snap.val() };
+    } catch(e) { console.log(e); }
+  }
+  const local = localStorage.getItem('toks_settings');
+  if (local) businessSettings = { ...businessSettings, ...JSON.parse(local) };
+  applySettingsToForm();
+}
+function applySettingsToForm() {
+  document.getElementById('setBankName').value = businessSettings.bankName;
+  document.getElementById('setAccNum').value = businessSettings.accountNumber;
+  document.getElementById('setAccName').value = businessSettings.accountName;
+  document.getElementById('setWhatsApp').value = businessSettings.whatsappNumber;
+  document.getElementById('setEmail').value = businessSettings.businessEmail;
+  document.getElementById('setPhone1').value = businessSettings.phone1;
+  document.getElementById('setPhone2').value = businessSettings.phone2;
+}
+
+function saveSettings() {
+  businessSettings = {
+    bankName: document.getElementById('setBankName').value,
+    accountNumber: document.getElementById('setAccNum').value,
+    accountName: document.getElementById('setAccName').value,
+    whatsappNumber: document.getElementById('setWhatsApp').value,
+    businessEmail: document.getElementById('setEmail').value,
+    phone1: document.getElementById('setPhone1').value,
+    phone2: document.getElementById('setPhone2').value,
+    currency: "₦"
+  };
+  localStorage.setItem('toks_settings', JSON.stringify(businessSettings));
+  if (useFirebase) {
+    try { db.ref('settings/business').set(businessSettings); }
+    catch(e) { console.log(e); }
+  }
+  alert('✅ Settings saved! Refresh the storefront to see updates.');
+}
+
+function login() {
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value.trim();
+  const err = document.getElementById('loginError');
+  const storedPass = localStorage.getItem('toks_admin_password') || 'toks2024';
+  if (!u || !p) { err.textContent = 'Please enter both username and password'; return; }
+  if (u === 'admin' && p === storedPass) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('adminLayout').style.display = 'grid';
+    initDashboard();
+  } else { err.textContent = 'Invalid username or password'; }
+}
+
+function changePassword() {
+  const curr = document.getElementById('currPassword').value;
+  const newP = document.getElementById('newPassword').value;
+  const conf = document.getElementById('confirmPassword').value;
+  const storedPass = localStorage.getItem('toks_admin_password') || 'toks2024';
+  if (curr !== storedPass) { alert('❌ Current password is incorrect'); return; }
+  if (!newP || newP.length < 4) { alert('❌ New password must be at least 4 characters'); return; }
+  if (newP !== conf) { alert('❌ New passwords do not match'); return; }
+  localStorage.setItem('toks_admin_password', newP);
+  alert('✅ Password updated successfully! Please use the new password on next login.');
+  document.getElementById('currPassword').value = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmPassword').value = '';
+}
+
+function logout() { location.reload(); }
+
+function toggleSubmenu(menuId, el) {
+  const menu = document.getElementById(menuId);
+  const icon = el.querySelector('.submenu-icon');
+  menu.classList.toggle('active');
+  icon.style.transform = menu.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+function showSettingsSection(section) {
+  showTab('settings');
+  setTimeout(() => {
+    const el = document.getElementById('settings-' + section);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function showTab(tab) {
+  ['dashboard','orders','inventory','products','addProduct','settings'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+    const nav = document.getElementById('nav-' + t);
+    if (nav) nav.classList.toggle('active', t === tab);
+  });
+  // Close settings submenu if leaving settings
+  if (tab !== 'settings') {
+    document.getElementById('settingsMenu').classList.remove('active');
+    const icon = document.querySelector('#nav-settings .submenu-icon');
+    if (icon) icon.style.transform = 'rotate(0deg)';
+  }
+  if (tab === 'orders') renderOrders('all');
+  if (tab === 'inventory') renderInventory();
+  if (tab === 'products') renderProducts();
+  if (tab === 'dashboard') updateStats();
+  if (tab === 'settings') loadSettings();
+  if (tab === 'addProduct') { currentImageData = null; document.getElementById('imagePreview').innerHTML = '<span><i class="fas fa-image" style="font-size:2rem;color:#cbd5e1;"></i><br>No image selected</span>'; document.getElementById('imagePreview').classList.remove('has-image'); }
+}
+
+function updateStats() {
+  const totalRev = orders.filter(o => o.status === 'Completed').reduce((sum, o) => sum + o.total, 0);
+  document.getElementById('statRevenue').textContent = '₦' + totalRev.toLocaleString();
+  document.getElementById('statOrders').textContent = orders.length;
+  document.getElementById('statProducts').textContent = products.length;
+  document.getElementById('statPending').textContent = orders.filter(o => o.status === 'Pending').length;
+  const pending = orders.filter(o => o.status === 'Pending').length;
+  const badge = document.getElementById('pendingBadge');
+  if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; }
+  else badge.style.display = 'none';
+  renderChart();
+}
+
+function renderChart() {
+  const ctx = document.getElementById('salesChart').getContext('2d');
+  if (salesChart) salesChart.destroy();
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const data = days.map(() => Math.floor(Math.random() * 50000) + 10000);
+  salesChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: days, datasets: [{ label: 'Revenue (₦)', data: data, borderColor: '#db2777', backgroundColor: 'rgba(219,39,119,0.08)', tension: 0.4, fill: true, pointBackgroundColor: '#f59e0b', pointRadius: 5, pointHoverRadius: 7 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+  });
+}
+
+function renderOrders(filter) {
+  const tbody = document.getElementById('ordersTable');
+  let filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+  filtered = filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+  if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;">No orders found</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(o => `
+    <tr>
+      <td><strong style="color:var(--pink-dark);">${o.id}</strong></td>
+      <td><div style="font-weight:600;">${o.customer || 'Guest'}</div><small style="color:var(--gray);">${o.phone || ''}</small></td>
+      <td>${o.items.length} item(s)<br><small style="color:var(--gray);">${o.items.map(i => i.name).slice(0,2).join(', ')}${o.items.length > 2 ? '...' : ''}</small></td>
+      <td><strong>₦${o.total.toLocaleString()}</strong></td>
+      <td>${o.date}</td>
+      <td><span class="badge badge-${o.status.toLowerCase()}">${o.status}</span></td>
+      <td>
+        ${o.phone ? `<a href="tel:${o.phone}" class="btn-sm" style="background:#dbeafe;color:#1e40af;text-decoration:none;margin-right:0.4rem;" title="Call Customer"><i class="fas fa-phone"></i></a>` : ''}
+        ${o.status === 'Pending' ? `<button class="btn-sm btn-accept" onclick="updateOrder('${o.id}', 'Accepted')"><i class="fas fa-check"></i> Accept</button><button class="btn-sm btn-decline" onclick="updateOrder('${o.id}', 'Cancelled')"><i class="fas fa-times"></i> Decline</button>` : ''}
+        ${o.status === 'Accepted' ? `<button class="btn-sm btn-complete" onclick="updateOrder('${o.id}', 'Completed')"><i class="fas fa-check-double"></i> Complete</button>` : ''}
+        ${o.status === 'Completed' ? '<span style="color:var(--success);"><i class="fas fa-check-circle"></i> Done</span>' : ''}
+        ${o.status === 'Cancelled' ? '<span style="color:var(--danger);"><i class="fas fa-ban"></i> Cancelled</span>' : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+function filterOrders(status, btn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderOrders(status); }
+function updateOrder(id, status) {
+  const order = orders.find(o => o.id === id);
+  if (order) { order.status = status; localStorage.setItem('toks_orders', JSON.stringify(orders)); if (useFirebase) { try { db.ref('orders/' + id).update({ status: status }); } catch(e) {} } renderOrders('all'); updateStats(); }
+}
+
+function renderInventory() {
+  const tbody = document.getElementById('inventoryTable');
+  tbody.innerHTML = inventory.map(item => {
+    const isLow = item.stock <= 5 && item.cat !== 'services' && item.cat !== 'training';
+    const isService = item.cat === 'services' || item.cat === 'training';
+    return `
+    <tr>
+      <td><div class="product-cell"><div class="product-thumb">${isService ? '⚡' : '📦'}</div><div><div style="font-weight:600;">${item.name}</div><small style="color:var(--gray);text-transform:uppercase;">${item.cat}</small></div></div></td>
+      <td style="text-transform:capitalize;">${item.cat}</td>
+      <td>₦${item.price.toLocaleString()}</td>
+      <td><strong>${isService ? '∞' : item.stock}</strong></td>
+      <td>${isLow ? '<span class="badge badge-low">LOW STOCK</span>' : '<span style="color:var(--success);">OK</span>'}</td>
+      <td>${!isService ? `<div style="display:flex;align-items:center;gap:0.5rem;"><input type="number" class="qty-input" id="restock-${item.id}" value="10" min="1"><button class="btn-sm btn-restock" onclick="restock(${item.id})"><i class="fas fa-plus"></i> Restock</button></div>` : '<span style="color:var(--gray);">Service</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+function restock(id) {
+  const qty = parseInt(document.getElementById(`restock-${id}`).value) || 0;
+  const item = inventory.find(i => i.id === id);
+  if (item && qty > 0) { item.stock += qty; localStorage.setItem('toks_inventory', JSON.stringify(inventory)); if (useFirebase) { try { db.ref('inventory/' + id).update({ stock: item.stock }); } catch(e) {} } renderInventory(); alert(`✅ Restocked ${item.name} with ${qty} units. New stock: ${item.stock}`); }
+}
+
+function renderProducts() {
+  const tbody = document.getElementById('productsTable');
+  tbody.innerHTML = products.map(item => {
+    const img = item.imageData ? `<img src="${item.imageData}">` : (item.image || '🛍️');
+    return `
+    <tr>
+      <td>#${item.id}</td>
+      <td><div class="product-thumb">${img}</div></td>
+      <td><div style="font-weight:600;">${item.name}</div></td>
+      <td style="text-transform:capitalize;">${item.cat}</td>
+      <td>₦${item.price.toLocaleString()}</td>
+      <td><button class="btn-sm" style="background:#f1f5f9;color:var(--dark);" onclick="deleteProduct(${item.id})"><i class="fas fa-trash"></i> Delete</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function previewImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentImageData = e.target.result;
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = `<img src="${currentImageData}">`;
+    preview.classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function addProduct() {
+  const name = document.getElementById('newProdName').value.trim();
+  const price = parseInt(document.getElementById('newProdPrice').value);
+  const cat = document.getElementById('newProdCat').value;
+  const badge = document.getElementById('newProdBadge').value.trim();
+  const desc = document.getElementById('newProdDesc').value.trim();
+  if (!name || !price) { alert('Please enter product name and price'); return; }
+  const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+  
+  let newProduct = {
+    id: newId, name, price, cat, rating: 5,
+    image: currentImageData ? '' : '🛍️',
+    imageData: currentImageData || null,
+    badge, desc
+  };
+
+  if (currentImageData && useFirebase && storage) {
+    try {
+      const fileRef = storage.ref('products/' + newId + '_' + Date.now() + '.jpg');
+      await fileRef.putString(currentImageData, 'data_url');
+      const downloadURL = await fileRef.getDownloadURL();
+      newProduct.imageData = downloadURL;
+      newProduct.image = '';
+    } catch (err) {
+      console.error('Firebase Storage upload failed:', err);
+      alert('⚠️ Cloud image upload failed. Saving locally instead.');
+    }
+  }
+
+  products.push(newProduct);
+  localStorage.setItem('toks_products', JSON.stringify(products));
+  if (useFirebase) {
+    try { db.ref('products/' + newId).set(newProduct); } catch(e) { console.log(e); }
+  }
+  
+  inventory.push({ id: newId, name, cat, price, stock: 10 });
+  localStorage.setItem('toks_inventory', JSON.stringify(inventory));
+  if (useFirebase) {
+    try { db.ref('inventory/' + newId).set({ id: newId, name, cat, price, stock: 10 }); } catch(e) {}
+  }
+  
+  alert(`✅ Product "${name}" added successfully!`);
+  document.getElementById('newProdName').value = '';
+  document.getElementById('newProdPrice').value = '';
+  document.getElementById('newProdBadge').value = '';
+  document.getElementById('newProdDesc').value = '';
+  document.getElementById('newProdImage').value = '';
+  currentImageData = null;
+  document.getElementById('imagePreview').innerHTML = '<span><i class="fas fa-image" style="font-size:2rem;color:#cbd5e1;"></i><br>No image selected</span>';
+  document.getElementById('imagePreview').classList.remove('has-image');
+  showTab('products');
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  products = products.filter(p => p.id !== id);
+  localStorage.setItem('toks_products', JSON.stringify(products));
+  if (useFirebase) { try { db.ref('products/' + id).remove(); } catch(e) {} }
+  renderProducts();
+  document.getElementById('statProducts').textContent = products.length;
+}
+
+function initDashboard() {
+  loadSettings();
+  updateStats();
+  showTab('dashboard');
+}
+</script>
+</body>
+</html>
